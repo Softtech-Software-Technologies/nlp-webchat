@@ -55,6 +55,20 @@ class Buttons extends PureComponent {
         {(isLast || persit) && (
           <div className="rw-replies">
             {buttons.map((reply, index) => {
+              if (reply.get('type') === 'web_url_live_help') {
+                return (
+                  <a
+                    key={index}
+                    href={reply.get('url')}
+                    rel="noopener noreferrer"
+                    className={'rw-reply'}
+                    style={buttonStyle}
+                    onMouseUp={e => e.stopPropagation()}
+                  >
+                    {reply.get('title')}
+                  </a>
+                );
+              }
               if (reply.get('type') === 'web_url') {
                 return (
                   <a
