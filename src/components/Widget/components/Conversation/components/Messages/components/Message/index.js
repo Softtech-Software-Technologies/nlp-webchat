@@ -1,3 +1,4 @@
+
 import React, { PureComponent } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { connect } from 'react-redux';
@@ -7,6 +8,9 @@ import { PROP_TYPES } from 'constants';
 import DocViewer from '../docViewer';
 import './styles.scss';
 import ThemeContext from '../../../../../../ThemeContext';
+
+// Import any necessary remark or rehype plugins if you need them
+import remarkGfm from 'remark-gfm'; // For GitHub Flavored Markdown support
 
 class Message extends PureComponent {
   render() {
@@ -38,27 +42,30 @@ class Message extends PureComponent {
           `rw-${sender}`}
         style={style}
       >
-        <div
-          className="rw-message-text"
-        >
+        <div className="rw-message-text">
           {sender === 'response' ? (
             <ReactMarkdown
-              className={'rw-markdown'}
-              source={text}
-              linkTarget={(url) => {
-                if (!url.startsWith('mailto') && !url.startsWith('javascript')) return '_blank';
-                return undefined;
-              }}
-              transformLinkUri={null}
-              renderers={{
-                link: props =>
+              className="rw-markdown"
+              remarkPlugins={[remarkGfm]} // Add remark plugins if needed
+              components={{
+                // Customizing link rendering
+                a: ({ href, children }) => 
                   docViewer ? (
-                    <DocViewer src={props.href}>{props.children}</DocViewer>
+                    <DocViewer src={href}>{children}</DocViewer>
                   ) : (
-                    <a href={props.href} target={linkTarget || '_blank'} rel="noopener noreferrer" onMouseUp={e => e.stopPropagation()}>{props.children}</a>
+                    <a
+                      href={href}
+                      target={linkTarget || '_blank'}
+                      rel="noopener noreferrer"
+                      onMouseUp={e => e.stopPropagation()}
+                    >
+                      {children}
+                    </a>
                   )
               }}
-            />
+            >
+              {text}
+            </ReactMarkdown>
           ) : (
             text
           )}
@@ -68,7 +75,6 @@ class Message extends PureComponent {
   }
 }
 
-
 Message.contextType = ThemeContext;
 Message.propTypes = {
   message: PROP_TYPES.MESSAGE,
@@ -76,7 +82,7 @@ Message.propTypes = {
   linkTarget: PropTypes.string
 };
 
-Message.defaultTypes = {
+Message.defaultProps = {
   docViewer: false,
   linkTarget: '_blank'
 };
